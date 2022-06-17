@@ -18,6 +18,24 @@ const getResponseWithFormattedTime = async (response) => {
     );
 };
 
+const getLogs = () => {
+    const logsString = localStorage.getItem('logs');
+    if (logsString) {
+        return JSON.parse(logsString);
+    } else {
+        return [];
+    }
+};
+
+const log = async (text) => {
+    const logs = getLogs();
+    logs.push({
+        time: new Date().toLocaleTimeString(),
+        text,
+    });
+    localStorage.setItem('logs', JSON.stringify(logs));
+};
+
 const fetchAndCacheNews = async () => {
     const url = `https://newsapi.org/v2/everything?q=bitcoin&sortBy=publishedAt&apiKey=${apiKeyNews}`;
     const response = await fetch(url);
@@ -40,6 +58,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('periodicsync', (event) => {
     if (event.tag === 'news') {
         console.log('Fetching news in the background!');
+        log('❤️❤️❤️ It Workks ❤️❤️❤️');
         event.waitUntil(fetchAndCacheNews());
     }
 });
