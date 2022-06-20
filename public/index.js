@@ -85,6 +85,9 @@ const main = async () => {
                 await registration.periodicSync.register('news', {
                     minInterval: 24 * 60 * 60 * 1000, // 1 day
                 });
+                await registration.periodicSync.register('tiemout', {
+                    minInterval: 24 * 60 * 60 * 1000, // 1 day
+                });
                 console.log('Periodic background sync registered!');
                 log('Periodic background sync registered!');
             } catch (e) {

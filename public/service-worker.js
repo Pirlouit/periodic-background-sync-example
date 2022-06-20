@@ -37,12 +37,19 @@ const log = async (text) => {
 };
 
 const fetchAndCacheNews = async () => {
+    console.log('Fetching news in the background!');
+    log('❤️❤️❤️ It Workks ❤️❤️❤️');
     const url = `https://newsapi.org/v2/everything?q=bitcoin&sortBy=publishedAt&apiKey=${apiKeyNews}`;
     const response = await fetch(url);
     const responseWithTime = await getResponseWithFormattedTime(response);
 
     const cache = await caches.open('cache-news');
     await cache.put(url, responseWithTime);
+};
+
+const clearCache = async () => {
+    log('Cache was cleared');
+    setTimeout(clearCache, 10000);
 };
 
 self.addEventListener('install', (event) => {
@@ -56,10 +63,11 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('periodicsync', (event) => {
+    log('Event periodicsync: ' + event.tag);
     if (event.tag === 'news') {
-        console.log('Fetching news in the background!');
-        log('❤️❤️❤️ It Workks ❤️❤️❤️');
         event.waitUntil(fetchAndCacheNews());
+    } else if (event.tag === 'timeout') {
+        event.waitUntil(clearCache());
     }
 });
 
