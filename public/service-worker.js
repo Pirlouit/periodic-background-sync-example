@@ -51,8 +51,8 @@ self.addEventListener('install', (event) => {
     event.waitUntil(preCache());
 });
 
-self.addEventListener('periodicsync', function (event) {
-    log('Event periodicsync: ' + event.tag);
+self.addEventListener('periodicsync', async function (event) {
+    await log('Event periodicsync: ' + event.tag);
     if (event.tag === 'news') {
         event.waitUntil(fetchAndCacheNews());
     }

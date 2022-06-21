@@ -42,7 +42,7 @@ const main = async () => {
     await diplayLogs();
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js');
-        log('service worker registered');
+        await log('service worker registered');
     }
 
     const registration = await navigator.serviceWorker.ready;
@@ -54,25 +54,25 @@ const main = async () => {
         });
 
         if (status.state === 'granted') {
-            log('granted');
+            await log('granted');
             try {
                 // Register new sync every 24 hours
                 await registration.periodicSync.register('news', {
                     minInterval: 24 * 60 * 60 * 1000, // 1 day
                 });
                 console.log('Periodic background sync registered!');
-                log('Periodic background sync registered!');
+                await log('Periodic background sync registered!');
             } catch (e) {
                 console.error(`Periodic background sync failed:\nx${e}`);
-                log(`Periodic background sync failed:\nx${e}`);
+                await log(`Periodic background sync failed:\nx${e}`);
             }
         } else {
             console.info('Periodic background sync is not granted.');
-            log('Periodic background sync is not granted.');
+            await log('Periodic background sync is not granted.');
         }
     } else {
         console.log('Periodic background sync is not supported.');
-        log('Periodic background sync is not supported.');
+        await log('Periodic background sync is not supported.');
     }
 };
 
