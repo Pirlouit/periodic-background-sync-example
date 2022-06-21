@@ -1,41 +1,36 @@
-const apiKeyNews = 'ac6a9c73261f4943a5f3c612aa12b1f3'; // replace with API key from newsapi.org
+import('./localforage.js');
 
-const getLogs = () => {
-    const logsString = localStorage.getItem('logs');
-    if (logsString) {
-        return JSON.parse(logsString);
+const openLogCache = async () => {
+    const logCache = await caches.open('logs');
+    logCache.match('logs').then((x) => {
+        const content = x.json();
+
+        logCache.put('logs', {});
+    });
+};
+
+const getLogs = async () => {
+    const logs = await localforage.getItem('logs');
+    if (logs) {
+        return logs;
     } else {
         return [];
     }
 };
 
 const log = async (text) => {
-    const logs = getLogs();
+    const logs = await getLogs();
     logs.push({
         time: new Date().toLocaleTimeString(),
         text,
     });
-    localStorage.setItem('logs', JSON.stringify(logs));
+    await localforage.setItem('logs', logs);
 };
 
-const createArticleElement = (article) => {
-    const element = document.createElement('h3');
-    element.textContent = article.title;
-    const linkElement = document.createElement('a');
-    linkElement.href = article.url;
-    linkElement.appendChild(element);
-
-    return linkElement;
-};
-
-const setLastFetchedDate = (formattedTime) => {
-    const element = document.getElementById('last-fetched');
-    element.textContent = formattedTime;
-};
-
-const diplayLogs = () => {
+const diplayLogs = async () => {
     const element = document.getElementById('logs');
-    const logs = getLogs();
+    const logs = await getLogs();
+    console.log(logs);
     logs.forEach((value, index) => {
         const logElement = document.createElement('p');
         logElement.textContent = `${value.time} - ${value.text}`;
@@ -43,31 +38,11 @@ const diplayLogs = () => {
     });
 };
 
-const fetchNews = async () => {
-    const url = `https://newsapi.org/v2/everything?q=bitcoin&sortBy=publishedAt&apiKey=${apiKeyNews}`;
-    const response = await fetch(url);
-    return response.json();
-};
-
 const main = async () => {
-    diplayLogs();
+    await diplayLogs();
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/service-worker.js');
         log('service worker registered');
-    }
-    const news = await fetchNews();
-    if (news.formattedTime) {
-        setLastFetchedDate(news.formattedTime);
-    }
-
-    const articles = news.articles;
-    if (articles && articles.length) {
-        const newsElement = document.getElementById('news');
-        if (!newsElement) return;
-
-        articles.forEach((article) => {
-            newsElement.appendChild(createArticleElement(article));
-        });
     }
 
     const registration = await navigator.serviceWorker.ready;
@@ -83,9 +58,6 @@ const main = async () => {
             try {
                 // Register new sync every 24 hours
                 await registration.periodicSync.register('news', {
-                    minInterval: 24 * 60 * 60 * 1000, // 1 day
-                });
-                await registration.periodicSync.register('tiemout', {
                     minInterval: 24 * 60 * 60 * 1000, // 1 day
                 });
                 console.log('Periodic background sync registered!');
